@@ -3,6 +3,7 @@ import urllib.request
 import zipfile
 import requests
 import pandas as pd
+import csv
 
 class FileManager:
     def __init__(self):
@@ -92,7 +93,7 @@ class FileManager:
             os.remove(archivo)  # Elimina el archivo zip después de descomprimirlo
             
             
-    def txt_to_csv(input_folder):
+    def txt_to_csv(self, input_folder):
         """
         Converts all text files in the given input folder to CSV format and saves them in the same directory.
         
@@ -113,11 +114,10 @@ class FileManager:
                     
                     try:
                         # Leer el archivo txt en un DataFrame
-                        df = pd.read_csv(txt_file_path, delimiter="\t")  # Ajusta el delimitador según sea necesario
+                        df = pd.read_csv(txt_file_path, delimiter=",")  # Ajusta el delimitador según sea necesario
                         
                         # Guardar el DataFrame en un archivo CSV
-                        df.to_csv(csv_file_path, index=False)
-                        
+                        df.to_csv(csv_file_path, index=False, quoting=csv.QUOTE_NONE, escapechar='\\')
                         print(f"Convertido: {txt_file_path} a {csv_file_path}")
                         
                         # Eliminar el archivo txt después de convertirlo
@@ -143,10 +143,10 @@ class FileManager:
         archivos_descargados = self.descargar_archivos(urls)
         self.descomprimir_archivos(archivos_descargados)
         input_folder = os.path.dirname(os.path.abspath(__file__))
+        
         self.txt_to_csv(input_folder)
 
 if __name__ == "__main__":
     url = "https://us-central1-duoc-bigdata-sc-2023-01-01.cloudfunctions.net/datos_transporte_et"
-    
     file_manager = FileManager()
     file_manager.procesar_url(url)
