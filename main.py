@@ -2,6 +2,7 @@ import os
 import urllib.request
 import zipfile
 import requests
+import pandas as pd
 
 class FileManager:
     def __init__(self):
@@ -89,6 +90,41 @@ class FileManager:
             with zipfile.ZipFile(archivo, 'r') as zip_ref:
                 zip_ref.extractall(folder)
             os.remove(archivo)  # Elimina el archivo zip después de descomprimirlo
+            
+            
+    def txt_to_csv(input_folder):
+        """
+        Converts all text files in the given input folder to CSV format and saves them in the same directory.
+        
+        Parameters:
+            input_folder (str): The path to the folder containing the text files.
+        
+        Returns:
+            None
+        
+        Raises:
+            Exception: If an error occurs during the conversion process.
+        """
+        for root, dirs, files in os.walk(input_folder):
+            for file in files:
+                if file.endswith(".txt"):
+                    txt_file_path = os.path.join(root, file)
+                    csv_file_path = os.path.splitext(txt_file_path)[0] + ".csv"
+                    
+                    try:
+                        # Leer el archivo txt en un DataFrame
+                        df = pd.read_csv(txt_file_path, delimiter="\t")  # Ajusta el delimitador según sea necesario
+                        
+                        # Guardar el DataFrame en un archivo CSV
+                        df.to_csv(csv_file_path, index=False)
+                        
+                        print(f"Convertido: {txt_file_path} a {csv_file_path}")
+                        
+                        # Eliminar el archivo txt después de convertirlo
+                        os.remove(txt_file_path)
+                        print(f"Eliminado: {txt_file_path}")
+                    except Exception as e:
+                        print(f"Error al convertir {txt_file_path}: {e}")
 
     def procesar_url(self, url_api):
         """
@@ -106,6 +142,8 @@ class FileManager:
         urls = self.obtener_urls()
         archivos_descargados = self.descargar_archivos(urls)
         self.descomprimir_archivos(archivos_descargados)
+        input_folder = os.path.dirname(os.path.abspath(__file__))
+        self.txt_to_csv(input_folder)
 
 if __name__ == "__main__":
     url = "https://us-central1-duoc-bigdata-sc-2023-01-01.cloudfunctions.net/datos_transporte_et"
